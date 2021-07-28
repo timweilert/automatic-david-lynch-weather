@@ -3,13 +3,10 @@
 require 'json'
 require 'net/http'
 require 'uri'
-
-#User variables, do change these
-zip = 'ZIP'
-key = 'KEY'
+include 'keys.rb'
 
 #API calls for openweathermap.org
-current_weather_source = "http://api.weatherapi.com/v1/forecast.json?key=#{key}&q=#{zip}&days=1&aqi=no&alerts=no"
+current_weather_source = "http://api.weatherapi.com/v1/forecast.json?key=#{$key}&q=#{$zip}&days=1&aqi=no&alerts=no"
 
 #Get current weather data in JSON and turn in to a Ruby hash
 resp = Net::HTTP.get_response(URI.parse(current_weather_source))
