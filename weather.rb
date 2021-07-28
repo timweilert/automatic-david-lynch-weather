@@ -3,7 +3,7 @@
 require 'json'
 require 'net/http'
 require 'uri'
-include 'keys.rb'
+load 'keys.rb'
 
 #API calls for openweathermap.org
 current_weather_source = "http://api.weatherapi.com/v1/forecast.json?key=#{$key}&q=#{$zip}&days=1&aqi=no&alerts=no"
@@ -42,6 +42,6 @@ puts "It is the month of #{month}"
 puts "It is #{minute} minutes"
 puts "It is the year #{year}"
 
-
+puts current_weather_source
 
 #exec 'omxplayer "/home/pi/8_hours_sleep_sounds.mp3"'
