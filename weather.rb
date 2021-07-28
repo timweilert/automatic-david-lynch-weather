@@ -3,10 +3,13 @@
 require 'json'
 require 'net/http'
 require 'uri'
-load 'keys.rb'
+load 'keys.rb' 
+#place a file called keys.rb in the same directory and have the following lines:
+# $key = 'your weatherapi.com key'
+# $location = 'your zipcode, or city, see https://www.weatherapi.com/docs/ under Request Parameters'
 
 #API calls for openweathermap.org
-current_weather_source = "http://api.weatherapi.com/v1/forecast.json?key=#{$key}&q=#{$zip}&days=1&aqi=no&alerts=no"
+current_weather_source = "http://api.weatherapi.com/v1/forecast.json?key=#{$key}&q=#{$location}&days=1&aqi=no&alerts=no"
 
 #Get current weather data in JSON and turn in to a Ruby hash
 resp = Net::HTTP.get_response(URI.parse(current_weather_source))
