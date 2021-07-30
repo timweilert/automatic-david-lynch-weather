@@ -8,14 +8,14 @@ load 'keys.rb'
 # $key = 'your weatherapi.com key'
 # $location = 'your zipcode, or city, see https://www.weatherapi.com/docs/ under Request Parameters'
 
+#might need to do pulseaudio --start before running this script
+
 def random_file_getter (directory)
 	base_dir = Dir.pwd
 	absolute_dir = "#{base_dir}/#{directory}"
 	command = "ls -d #{absolute_dir}/* | egrep '\.mp3' | shuf -n 1"
 	file = %x[ #{command} ]
 end #random_file_getter	
-	
-random_file_getter('audio/imthinkingabout')
 
 #API calls for openweathermap.org
 current_weather_source = "http://api.weatherapi.com/v1/forecast.json?key=#{$key}&q=#{$location}&days=1&aqi=no&alerts=no"
@@ -68,7 +68,8 @@ end #if
 	
 #it's [date], [year]
 
-items_to_play << "#{Dir.pwd}/audio/dates/#{month}#{day}.mp3"
+items_to_play << "#{Dir.pwd}/audio/dates/#{month}#{day}.mp3\n"
+
 items_to_play << random_file_getter("audio/year/#{year}")	
 
 #here in [location], set up for zip code
@@ -82,10 +83,12 @@ end #for
 
 File.new("weather.m3u", "w+")
 
+puts items_to_play
+
 items_to_play.each do |item|
 	File.open("weather.m3u", "a") {|f| f.write(item)}
 end #do	
 	puts items_to_play	
 	
 command = "#{Dir.pwd}/weather.m3u"
-exec 'omxplayer "#{command}"'
+exec "mplayer -playlist weather.m3u"
