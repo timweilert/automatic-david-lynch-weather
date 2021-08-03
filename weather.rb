@@ -139,7 +139,9 @@ end #if
 	
 #it's [date], [year]
 
-items_to_play << "#{Dir.pwd}/audio/02_date/#{month}#{day}.mp3\n"
+items_to_play << random_file_getter("/audio/02_date/month/#{month}")
+
+items_to_play << random_file_getter("/audio/XX_everything_else/numbers/#{day}")
 
 items_to_play << random_file_getter("audio/03_year/#{year}")	
 
