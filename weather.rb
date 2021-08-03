@@ -175,11 +175,11 @@ items_to_play << random_file_getter("audio/09_im_thinking_about")
 #later on
 
 if current_time_of_day == 'morning'
-	items_to_play << "#{Dir.pwd}/audio/10_later/thisafternoon.mp3"
+	items_to_play << "#{Dir.pwd}/audio/10_later/thisafternoon.mp3\n"
 elsif current_time_of_day == 'afternoon'
-	items_to_play << "#{Dir.pwd}/audio/10_later/tonight.mp3"
+	items_to_play << "#{Dir.pwd}/audio/10_later/tonight.mp3\n"
 else current_time_of_day == 'night'
-	items_to_play << "#{Dir.pwd}/audio/10_later/tomorrow.mp3"
+	items_to_play << "#{Dir.pwd}/audio/10_later/tomorrow.mp3\n"
 end #if
 
 items_to_play << random_file_getter("audio/10_later/itwillbe")
