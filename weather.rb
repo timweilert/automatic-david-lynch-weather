@@ -79,9 +79,10 @@ current_weather_source = JSON.parse(data)
 #Parse the hashes
 locationdata = current_weather_source.fetch("location")
 currentdata =  current_weather_source.fetch("current")
-tempf = currentdata.fetch("temp_f")
-time = locationdata.fetch("localtime_epoch")
-time_object = Time.at(time)
+
+#current temps
+current_tempf = currentdata.fetch("temp_f").round
+current_tempc = currentdata.fetch("temp_c").round
 
 #current conditions for weather and wind
 current_condition_hash = currentdata.fetch("condition")
@@ -89,6 +90,9 @@ current_condition_code = current_condition_hash.fetch("code").to_i
 current_windspeed = currentdata.fetch("wind_mph").to_f
 
 #Time specific values
+time = locationdata.fetch("localtime_epoch")
+time_object = Time.at(time)
+
 day = time_object.day
 hour = time_object.hour
 minute = time_object.min
@@ -100,15 +104,7 @@ current_time_of_day = 'morning' if hour > 4 && hour < 12
 current_time_of_day = 'afternoon' if hour >= 12 && hour < 5
 current_time_of_day = 'night' if hour >=5 || hour <= 4
 
-#Swirl the numbers
-puts "The current temperature is #{tempf}"
-puts "The current time is #{Time.at(time)}"
-puts "The current day is #{day}"
-puts "It is the month of #{month}"
-puts "It is #{minute} minutes"
-puts "It is the year #{year}"
-puts "it is #{hour}"
-
+#create an array to store in the various mp3s that will be played in order
 items_to_play = []
 
 #good morning, afternoon, or evening
@@ -133,7 +129,7 @@ items_to_play << random_file_getter("audio/05_here_in")
 
 i=0
 for i in 0..4
-items_to_play << random_file_getter("audio/numbers/#{$location[i,1]}")
+items_to_play << random_file_getter("audio/XX_everything_else/numbers/#{$location[i,1]}")
 i+=1
 end #for
 
@@ -143,6 +139,15 @@ items_to_play << weather_condition_getter(current_condition_code)
 #wind conditions
 items_to_play << wind_condition_getter(current_windspeed)
 
+items_to_play << random_file_getter("audio/XX_everything_else/numbers/#{current_tempf}")
+
+items_to_play << random_file_getter("audio/XX_everything_else/degreesf")
+
+items_to_play << random_file_getter("audio/XX_everything_else/numbers/#{current_tempc}")
+
+items_to_play << random_file_getter("audio/XX_everything_else/celsius")
+
+#make the playlist from the items_to_play array
 File.new("weather.m3u", "w+")
 
 puts items_to_play
@@ -154,3 +159,6 @@ end #do
 	
 command = "#{Dir.pwd}/weather.m3u"
 exec "mplayer -playlist weather.m3u"
+
+puts current_tempf
+puts current_tempc
