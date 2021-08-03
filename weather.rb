@@ -69,7 +69,7 @@ def wind_condition_getter(windspeed)
 end	
 
 #API calls for openweathermap.org
-current_weather_source = "http://api.weatherapi.com/v1/forecast.json?key=#{$key}&q=#{$location}&days=1&aqi=no&alerts=no"
+current_weather_source = "http://api.weatherapi.com/v1/forecast.json?key=#{$key}&q=#{$location}&days=2&aqi=no&alerts=no"
 
 #Get current weather data in JSON and turn in to a Ruby hash
 resp = Net::HTTP.get_response(URI.parse(current_weather_source))
@@ -79,15 +79,6 @@ current_weather_source = JSON.parse(data)
 #Parse the hashes
 locationdata = current_weather_source.fetch("location")
 currentdata =  current_weather_source.fetch("current")
-
-#current temps
-current_tempf = currentdata.fetch("temp_f").round
-current_tempc = currentdata.fetch("temp_c").round
-
-#current conditions for weather and wind
-current_condition_hash = currentdata.fetch("condition")
-current_condition_code = current_condition_hash.fetch("code").to_i
-current_windspeed = currentdata.fetch("wind_mph").to_f
 
 #Time specific values
 time = locationdata.fetch("localtime_epoch")
@@ -103,6 +94,36 @@ day_of_week = time_object.strftime("%A").downcase
 current_time_of_day = 'morning' if hour > 4 && hour < 12
 current_time_of_day = 'afternoon' if hour >= 12 && hour < 5
 current_time_of_day = 'night' if hour >=5 || hour <= 4
+
+
+
+
+forecastdata = current_weather_source.fetch("forecast")
+forecast_day = forecastdata.fetch("forecastday")
+
+
+if current_time_of_day == 'morning' || current_time_of_day == 'afternoon'
+	forecast_values = forecast_day[0].fetch("day")
+else current_time_of_day == 'night'
+	forecast_values = forecast_day[1].fetch("day")
+end #if
+
+forecast_tempf = forecast_values.fetch("maxtemp_f").round
+forecast_tempc = forecast_values.fetch("maxtemp_c").round
+forecast_weather_condition = forecast_values.fetch("condition")
+forecast_weather_condition_code = forecast_weather_condition.fetch("code")
+
+
+#current temps
+current_tempf = currentdata.fetch("temp_f").round
+current_tempc = currentdata.fetch("temp_c").round
+
+#current conditions for weather and wind
+current_condition_hash = currentdata.fetch("condition")
+current_condition_code = current_condition_hash.fetch("code").to_i
+current_windspeed = currentdata.fetch("wind_mph").to_f
+
+
 
 #create an array to store in the various mp3s that will be played in order
 items_to_play = []
@@ -146,6 +167,41 @@ items_to_play << random_file_getter("audio/XX_everything_else/degreesf")
 items_to_play << random_file_getter("audio/XX_everything_else/numbers/#{current_tempc}")
 
 items_to_play << random_file_getter("audio/XX_everything_else/celsius")
+
+#today I'm thinking about..
+
+items_to_play << random_file_getter("audio/09_im_thinking_about")
+
+#later on
+
+if current_time_of_day == 'morning'
+	items_to_play << "#{Dir.pwd}/audio/10_later/thisafternoon.mp3"
+elsif current_time_of_day == 'afternoon'
+	items_to_play << "#{Dir.pwd}/audio/10_later/tonight.mp3"
+else current_time_of_day == 'night'
+	items_to_play << "#{Dir.pwd}/audio/10_later/tomorrow.mp3"
+end #if
+
+items_to_play << random_file_getter("audio/10_later/itwillbe")
+
+items_to_play << random_file_getter("audio/XX_everything_else/numbers/#{forecast_tempf}")
+
+items_to_play << random_file_getter("audio/XX_everything_else/degreesf")
+
+items_to_play << random_file_getter("audio/XX_everything_else/numbers/#{forecast_tempc}")
+
+items_to_play << random_file_getter("audio/XX_everything_else/celsius")
+
+case forecast_weather_condition_code
+	when 1000
+		items_to_play << random_file_getter("audio/11_blue_skies_golden_sunshine/blueskiesgoldensunshine")
+	when 1006, 1003, 1150, 1153, 1183, 1198, 1240, 1249, 1180, 1063, 1069, 1072, 1216, 1204, 1210, 1213, 1255, 1261, 1279, 1066
+		items_to_play << random_file_getter("audio/11_blue_skies_golden_sunshine/blueskieswithclouds")
+	else
+		items_to_play << random_file_getter("audio/11_blue_skies_golden_sunshine/overcast")
+end #case
+
+items_to_play << random_file_getter("audio/12_have_a_great_day")		
 
 #make the playlist from the items_to_play array
 File.new("weather.m3u", "w+")
