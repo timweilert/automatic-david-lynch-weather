@@ -11,7 +11,7 @@ load 'keys.rb'
 #might need to do pulseaudio --start before running this script
 
 def random_file_getter (directory)
-	base_dir = Dir.pwd
+	base_dir = __dir__
 	absolute_dir = "#{base_dir}/#{directory}"
 	command = "ls -d #{absolute_dir}/* | egrep '\.mp3' | shuf -n 1"
 	file = %x[ #{command} ]
@@ -56,17 +56,26 @@ def wind_condition_getter(windspeed)
 #inspired by the Beaufort Scale https://en.wikipedia.org/wiki/Beaufort_scale
 	windspeed = windspeed.round
 	case windspeed
-		when 0..3
+		when 0..8
 			wind_condition = "still"
-		when 4..12
+		when 9..17
 			wind_condition = "weak"
-		when 13..24
+		when 17..24
 			wind_condition = "medium"
 		else
 			wind_condition = "strong"
 	end #case
 	return random_file_getter ("audio/07_wind_conditions/#{wind_condition}")
 end	
+
+def temperature_checker (temperature) #see if it's negative or not
+	if temperature < 0
+		return "/audio/XX_everything_else/negative.mp3\n#{random_file_getter("/audio/XX_everything_else/numbers/#{temperature}")}"
+	else
+		return random_file_getter("/audio/XX_everything_else/numbers/#{temperature}")
+	end
+end #temperature_checker	
+	
 
 #API calls for openweathermap.org
 current_weather_source = "http://api.weatherapi.com/v1/forecast.json?key=#{$key}&q=#{$location}&days=2&aqi=no&alerts=no"
@@ -92,8 +101,8 @@ year = time_object.year
 day_of_week = time_object.strftime("%A").downcase
 
 current_time_of_day = 'morning' if hour > 4 && hour < 12
-current_time_of_day = 'afternoon' if hour >= 12 && hour < 5
-current_time_of_day = 'night' if hour >=5 || hour <= 4
+current_time_of_day = 'afternoon' if hour >= 12 && hour < 17
+current_time_of_day = 'night' if hour >=17 || hour <= 4
 
 
 
@@ -127,6 +136,8 @@ current_windspeed = currentdata.fetch("wind_mph").to_f
 
 #create an array to store in the various mp3s that will be played in order
 items_to_play = []
+
+items_to_play << "#{__dir__}/audio/XX_everything_else/silence.mp3\n"
 
 #good morning, afternoon, or evening
 if current_time_of_day == 'morning'
@@ -162,11 +173,13 @@ items_to_play << weather_condition_getter(current_condition_code)
 #wind conditions
 items_to_play << wind_condition_getter(current_windspeed)
 
-items_to_play << random_file_getter("audio/XX_everything_else/numbers/#{current_tempf}")
+#items_to_play << random_file_getter("audio/08_current_temps/b_rightnow")
+#maybe add some better audio files for this step
+items_to_play << temperature_checker(current_tempf)
 
 items_to_play << random_file_getter("audio/XX_everything_else/degreesf")
 
-items_to_play << random_file_getter("audio/XX_everything_else/numbers/#{current_tempc}")
+items_to_play << temperature_checker(current_tempc)
 
 items_to_play << random_file_getter("audio/XX_everything_else/celsius")
 
@@ -177,27 +190,31 @@ items_to_play << random_file_getter("audio/09_im_thinking_about")
 #later on
 
 if current_time_of_day == 'morning'
-	items_to_play << "#{Dir.pwd}/audio/10_later/thisafternoon.mp3\n"
+	items_to_play << "#{__dir__}/audio/10_later/thisafternoon.mp3\n"
 elsif current_time_of_day == 'afternoon'
-	items_to_play << "#{Dir.pwd}/audio/10_later/tonight.mp3\n"
+	items_to_play << "#{__dir__}/audio/10_later/tonight.mp3\n"
 else current_time_of_day == 'night'
-	items_to_play << "#{Dir.pwd}/audio/10_later/tomorrow.mp3\n"
+	items_to_play << "#{__dir__}/audio/10_later/tomorrow.mp3\n"
 end #if
 
-items_to_play << random_file_getter("audio/10_later/itwillbe")
+if forecast_tempf > current_tempf
+	items_to_play << random_file_getter("audio/10_later/goingup")
+else
+	items_to_play << random_file_getter("audio/10_later/itwillbe")
+end #if	
 
-items_to_play << random_file_getter("audio/XX_everything_else/numbers/#{forecast_tempf}")
+items_to_play << temperature_checker(forecast_tempf)
 
 items_to_play << random_file_getter("audio/XX_everything_else/degreesf")
 
-items_to_play << random_file_getter("audio/XX_everything_else/numbers/#{forecast_tempc}")
+items_to_play << temperature_checker(forecast_tempc)
 
 items_to_play << random_file_getter("audio/XX_everything_else/celsius")
 
 case forecast_weather_condition_code
-	when 1000
+	when 1000, 1003
 		items_to_play << random_file_getter("audio/11_blue_skies_golden_sunshine/blueskiesgoldensunshine")
-	when 1006, 1003, 1150, 1153, 1183, 1198, 1240, 1249, 1180, 1063, 1069, 1072, 1216, 1204, 1210, 1213, 1255, 1261, 1279, 1066
+	when 1006, 1150, 1153, 1183, 1198, 1240, 1249, 1180, 1063, 1069, 1072, 1216, 1204, 1210, 1213, 1255, 1261, 1279, 1066
 		items_to_play << random_file_getter("audio/11_blue_skies_golden_sunshine/blueskieswithclouds")
 	else
 		items_to_play << random_file_getter("audio/11_blue_skies_golden_sunshine/overcast")
@@ -215,7 +232,7 @@ items_to_play.each do |item|
 end #do	
 	puts items_to_play	
 	
-command = "#{Dir.pwd}/weather.m3u"
+command = "#{__dir__}/weather.m3u"
 exec "mplayer -playlist weather.m3u"
 
 puts current_tempf
