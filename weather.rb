@@ -185,7 +185,17 @@ items_to_play << random_file_getter("audio/XX_everything_else/celsius")
 
 #today I'm thinking about..
 
-items_to_play << random_file_getter("audio/09_im_thinking_about")
+date_check = "#{month}#{day}"
+
+if date_check == "1225"
+	items_to_play << "#{__dir__}/audio/XX_everything_else/special/christmas.mp3\n"
+elsif date_check == "11"
+	items_to_play << "#{__dir__}/audio/XX_everything_else/special/happynewyeargreatday.mp3\n"
+elsif date_check = "214"
+	items_to_play << "#{__dir__}/audio/XX_everything_else/special/valentinesday.mp3\n"	
+else	
+	items_to_play << random_file_getter("audio/09_im_thinking_about")
+end #date check
 
 #later on
 
