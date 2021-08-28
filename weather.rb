@@ -4,6 +4,7 @@ require 'json'
 require 'net/http'
 require 'uri'
 load 'keys.rb' 
+load 'zip.rb'
 #place a file called keys.rb in the same directory and have the following lines:
 # $key = 'your weatherapi.com key'
 # $location = 'your zipcode, or city, see https://www.weatherapi.com/docs/ under Request Parameters'
@@ -15,6 +16,11 @@ def random_file_getter (directory)
 	absolute_dir = "#{base_dir}/#{directory}"
 	command = "ls -d #{absolute_dir}/* | egrep '\.mp3' | shuf -n 1"
 	file = %x[ #{command} ]
+	if $items_to_play.include? file == true
+		file = %x[ #{command} ]
+	else
+		file = file
+	end	
 end #random_file_getter	
 
 def weather_condition_getter (condition_code)
@@ -77,12 +83,13 @@ def temperature_checker (temperature) #see if it's negative or not
 end #temperature_checker	
 	
 
-#API calls for openweathermap.org
-current_weather_source = "http://api.weatherapi.com/v1/forecast.json?key=#{$key}&q=#{$location}&days=2&aqi=no&alerts=no"
+#API calls for weatherapi.com
+current_weather_source = "http://api.weatherapi.com/v1/forecast.json?key=#{$key}&q=#{$zip}&days=2&aqi=no&alerts=no"
 
 #Get current weather data in JSON and turn in to a Ruby hash
 resp = Net::HTTP.get_response(URI.parse(current_weather_source))
 data = resp.body
+
 current_weather_source = JSON.parse(data)
 
 #Parse the hashes
@@ -135,112 +142,110 @@ current_windspeed = currentdata.fetch("wind_mph").to_f
 
 
 #create an array to store in the various mp3s that will be played in order
-items_to_play = []
-
-items_to_play << "#{__dir__}/audio/XX_everything_else/silence.mp3\n"
+$items_to_play = []
 
 #good morning, afternoon, or evening
 if current_time_of_day == 'morning'
-	items_to_play << random_file_getter('audio/01_greeting/morning')
+	$items_to_play << random_file_getter('audio/01_greeting/morning')
 elsif current_time_of_day == 'afternoon'
-	items_to_play << random_file_getter('audio/01_greeting/afternoon')
+	$items_to_play << random_file_getter('audio/01_greeting/afternoon')
 else
-	items_to_play << random_file_getter('audio/01_greeting/evening')
+	$items_to_play << random_file_getter('audio/01_greeting/evening')
 end #if
 	
 #it's [date], [year]
 
-items_to_play << random_file_getter("/audio/02_date/month/#{month}")
+$items_to_play << random_file_getter("/audio/02_date/month/#{month}")
 
-items_to_play << random_file_getter("/audio/XX_everything_else/numbers/#{day}")
+$items_to_play << random_file_getter("/audio/XX_everything_else/numbers/#{day}")
 
-items_to_play << random_file_getter("audio/03_year/#{year}")	
+$items_to_play << random_file_getter("audio/03_year/#{year}")	
 
-items_to_play << random_file_getter("audio/04_day_of_week/#{day_of_week}")
+$items_to_play << random_file_getter("audio/04_day_of_week/#{day_of_week}")
 
-#here in [location], set up for zip code
-items_to_play << random_file_getter("audio/05_here_in")
+#here in [zip], set up for zip code
+$items_to_play << random_file_getter("audio/05_here_in")
 
 i=0
 for i in 0..4
-items_to_play << random_file_getter("audio/XX_everything_else/numbers/#{$location[i,1]}")
+$items_to_play << random_file_getter("audio/XX_everything_else/numbers/#{$zip[i,1]}")
 i+=1
 end #for
 
 # weather conditions
-items_to_play << weather_condition_getter(current_condition_code)
+$items_to_play << weather_condition_getter(current_condition_code)
 
 #wind conditions
-items_to_play << wind_condition_getter(current_windspeed)
+$items_to_play << wind_condition_getter(current_windspeed)
 
-#items_to_play << random_file_getter("audio/08_current_temps/b_rightnow")
+#$items_to_play << random_file_getter("audio/08_current_temps/b_rightnow")
 #maybe add some better audio files for this step
-items_to_play << temperature_checker(current_tempf)
+$items_to_play << temperature_checker(current_tempf)
 
-items_to_play << random_file_getter("audio/XX_everything_else/degreesf")
+$items_to_play << random_file_getter("audio/XX_everything_else/degreesf")
 
-items_to_play << temperature_checker(current_tempc)
+$items_to_play << temperature_checker(current_tempc)
 
-items_to_play << random_file_getter("audio/XX_everything_else/celsius")
+$items_to_play << random_file_getter("audio/XX_everything_else/celsius")
 
 #today I'm thinking about..
 
 date_check = "#{month}#{day}"
 
 if date_check == "1225"
-	items_to_play << "#{__dir__}/audio/XX_everything_else/special/christmas.mp3\n"
+	$items_to_play << "#{__dir__}/audio/XX_everything_else/special/christmas.mp3\n"
 elsif date_check == "11"
-	items_to_play << "#{__dir__}/audio/XX_everything_else/special/happynewyeargreatday.mp3\n"
-elsif date_check = "214"
-	items_to_play << "#{__dir__}/audio/XX_everything_else/special/valentinesday.mp3\n"	
+	$items_to_play << "#{__dir__}/audio/XX_everything_else/special/happynewyeargreatday.mp3\n"
+elsif date_check == "214"
+	$items_to_play << "#{__dir__}/audio/XX_everything_else/special/valentinesday.mp3\n"	
 else	
-	items_to_play << random_file_getter("audio/09_im_thinking_about")
+	$items_to_play << random_file_getter("audio/09_im_thinking_about")
 end #date check
 
 #later on
 
 if current_time_of_day == 'morning'
-	items_to_play << "#{__dir__}/audio/10_later/thisafternoon.mp3\n"
+	$items_to_play << "#{__dir__}/audio/10_later/thisafternoon.mp3\n"
 elsif current_time_of_day == 'afternoon'
-	items_to_play << "#{__dir__}/audio/10_later/tonight.mp3\n"
+	$items_to_play << "#{__dir__}/audio/10_later/tonight.mp3\n"
 else current_time_of_day == 'night'
-	items_to_play << "#{__dir__}/audio/10_later/tomorrow.mp3\n"
+	$items_to_play << "#{__dir__}/audio/10_later/tomorrow.mp3\n"
 end #if
 
 if forecast_tempf > current_tempf
-	items_to_play << random_file_getter("audio/10_later/goingup")
+	$items_to_play << random_file_getter("audio/10_later/goingup")
 else
-	items_to_play << random_file_getter("audio/10_later/itwillbe")
+	$items_to_play << random_file_getter("audio/10_later/itwillbe")
 end #if	
 
-items_to_play << temperature_checker(forecast_tempf)
+$items_to_play << temperature_checker(forecast_tempf)
 
-items_to_play << random_file_getter("audio/XX_everything_else/degreesf")
+$items_to_play << random_file_getter("audio/XX_everything_else/degreesf")
 
-items_to_play << temperature_checker(forecast_tempc)
+$items_to_play << temperature_checker(forecast_tempc)
 
-items_to_play << random_file_getter("audio/XX_everything_else/celsius")
+$items_to_play << random_file_getter("audio/XX_everything_else/celsius")
 
 case forecast_weather_condition_code
 	when 1000, 1003
-		items_to_play << random_file_getter("audio/11_blue_skies_golden_sunshine/blueskiesgoldensunshine")
+		$items_to_play << random_file_getter("audio/11_blue_skies_golden_sunshine/blueskiesgoldensunshine")
 	when 1006, 1150, 1153, 1183, 1198, 1240, 1249, 1180, 1063, 1069, 1072, 1216, 1204, 1210, 1213, 1255, 1261, 1279, 1066
-		items_to_play << random_file_getter("audio/11_blue_skies_golden_sunshine/blueskieswithclouds")
+		$items_to_play << random_file_getter("audio/11_blue_skies_golden_sunshine/blueskieswithclouds")
 	else
-		items_to_play << random_file_getter("audio/11_blue_skies_golden_sunshine/overcast")
+		$items_to_play << random_file_getter("audio/11_blue_skies_golden_sunshine/overcast")
 end #case
 
-items_to_play << random_file_getter("audio/12_have_a_great_day")		
+$items_to_play << random_file_getter("audio/12_have_a_great_day")		
 
-#make the playlist from the items_to_play array
+#make the playlist from the $items_to_play array
 File.new("weather.m3u", "w+")
 
-puts items_to_play
+puts $items_to_play
 
-items_to_play.each do |item|
+$items_to_play.each do |item|
 	File.open("weather.m3u", "a") {|f| f.write(item)}
 end #do	
-	puts items_to_play	
+	puts $items_to_play	
 	
 command = "#{__dir__}/weather.m3u"
 exec "mplayer -playlist weather.m3u"
