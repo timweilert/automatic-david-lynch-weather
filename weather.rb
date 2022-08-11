@@ -3,13 +3,17 @@
 require 'json'
 require 'net/http'
 require 'uri'
-load 'keys.rb' 
-load 'zip.rb'
+
+file_path = File.dirname(__FILE__)
+load "#{file_path}/keys.rb" 
+#load './zip.rb'
 #place a file called keys.rb in the same directory and have the following lines:
 # $key = 'your weatherapi.com key'
 # $location = 'your zipcode, or city, see https://www.weatherapi.com/docs/ under Request Parameters'
 
 #might need to do pulseaudio --start before running this script
+
+$zip = ARGV[0]
 
 def random_file_getter (directory)
 	base_dir = __dir__
