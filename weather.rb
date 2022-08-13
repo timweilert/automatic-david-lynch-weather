@@ -80,7 +80,8 @@ end
 
 def temperature_checker (temperature) #see if it's negative or not
 	if temperature < 0
-		return "/audio/XX_everything_else/negative.mp3\n#{random_file_getter("/audio/XX_everything_else/numbers/#{temperature}")}"
+		temperature_mp3 = random_file_getter("/audio/XX_everything_else/numbers/#{-temperature}")
+		return "#{__dir__}/audio/XX_everything_else/negative.mp3\n\r#{temperature_mp3}"
 	else
 		return random_file_getter("/audio/XX_everything_else/numbers/#{temperature}")
 	end
