@@ -1,10 +1,19 @@
 # automatic-david-lynch-weather
-Your own personal David Lynch Daily Weather Report
 
-To enable a pushbutton (momentary latch switch) upon system boot, add the following line to crontab -e
+Good morning!
 
-@reboot sudo python3 /home/pi/automatic-david-lynch-weather/button.py
+It's today, this year and it's the day of the week that it is now.
 
-Furthermore, wire the button between ground and GPIO 26 or adjust button.py to accomodate the GPIO pin of your choice.
+Here in your zip code it's your own personal David Lynch Daily Weather Report
 
-This assumes you've installed this repo in the /home/pi directory. 
+It's very calm, very still right now...
+
+This afternoon, to call the script, provide a key from weatherapi.com in a file called key.rb
+
+This script takes 1 argument for zip code, so usage is as follows:
+
+$ruby weather.rb 90210
+
+Enjoy those blue skies and golden sunshine all along the way.
+
+Everyone, have a great day!
